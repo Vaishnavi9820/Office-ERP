@@ -1,0 +1,5 @@
+streamlit==1.43.0
+pandas==2.2.3
+psycopg2-binary==2.9.10
+plotly==6.1.2
+python-dateutil==2.9.0.post0
