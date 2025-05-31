@@ -1,0 +1,7 @@
+<!-- expenditure_request_form.html -->
+<h2>Submit Expenditure Request</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Request</button>
+</form>

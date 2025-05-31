@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="text-2xl font-bold">Make a Request</h2>
+    </div>
+
+    {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Dashboard Statistics Section -->
+    <div id="dashboardStats" class="request-stats-container mb-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Expenditure Stats -->
+        <div class="stats-card" onclick="showForm('expenditure', this)">
+            <div class="card-header" style="background: linear-gradient(135deg, #6366F1, #4338CA);">
+                <h3 class="text-xl font-bold text-white">Expenditure Requests</h3>
+            </div>
+            <div class="card-body">
+                <div class="stat-item">
+                    <span class="stat-label">Total Requests</span>
+                    <span class="stat-value">{{ total_expenditure_count|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved</span>
+                    <span class="stat-value">{{ approved_expenditures|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value">{{ pending_expenditures|default:"0" }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leave Stats -->
+        <div class="stats-card" onclick="showForm('leave', this)">
+            <div class="card-header" style="background: linear-gradient(135deg, #10B981, #059669);">
+                <h3 class="text-xl font-bold text-white">Leave Requests</h3>
+            </div>
+            <div class="card-body">
+                <div class="stat-item">
+                    <span class="stat-label">Total Leaves</span>
+                    <span class="stat-value">{{ total_leaves|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved Leaves</span>
+                    <span class="stat-value">{{ approved_leaves|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pending Leaves</span>
+                    <span class="stat-value">{{ pending_leaves|default:"0" }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Other Requests Stats -->
+        <div class="stats-card" onclick="showForm('other', this)">
+            <div class="card-header" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                <h3 class="text-xl font-bold text-white">Other Requests</h3>
+            </div>
+            <div class="card-body">
+                <div class="stat-item">
+                    <span class="stat-label">Total Requests</span>
+                    <span class="stat-value">{{ total_other_requests|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Approved</span>
+                    <span class="stat-value">{{ approved_other_requests|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value">{{ pending_other_requests|default:"0" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button Group for Requests -->
+    <div id="requestButtons" class="text-center mb-4">
+        <button id="expenditureBtn" class="request-btn" onclick="showForm('expenditure', this)">Expenditure Request</button>
+        <button id="leaveBtn" class="request-btn" onclick="showForm('leave', this)">Leave Request</button>
+        <button id="otherBtn" class="request-btn" onclick="showForm('other', this)">Other Request</button>
+    </div>
+
+    <!-- Request Forms -->
+    <div id="formsContainer">
+        <form id="expenditure" method="post" class="request-form hidden">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ expenditure_form.as_p }}
+            </div>
+            <input type="hidden" name="form_type" value="expenditure">
+            <button type="submit" class="btn btn-success w-100">Submit</button>
+        </form>
+
+        <form id="leave" method="post" class="request-form hidden">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="leave">
+            <div class="form-group mb-3">
+                <label for="{{ leave_form.title.id_for_label }}">Leave Title</label>
+                {{ leave_form.title }}
+            </div>
+            <div class="form-group mb-3">
+                <label for="{{ leave_form.from_date.id_for_label }}">From Date</label>
+                {{ leave_form.from_date }}
+            </div>
+            <div class="form-group mb-3">
+                <label for="{{ leave_form.to_date.id_for_label }}">To Date</label>
+                {{ leave_form.to_date }}
+            </div>
+            <div class="form-group mb-3">
+                <label for="{{ leave_form.message.id_for_label }}">Message</label>
+                {{ leave_form.message }}
+            </div>
+            <div class="form-group mb-3">
+                <label>Number of Days (excluding Sundays)</label>
+                <input type="text" id="leave_days" class="form-control" readonly>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Submit Leave Request</button>
+        </form>
+
+        <script>
+            // Add this to your existing JavaScript
+            document.addEventListener('DOMContentLoaded', function() {
+                const fromDateInput = document.querySelector('#{{ leave_form.from_date.id_for_label }}');
+                const toDateInput = document.querySelector('#{{ leave_form.to_date.id_for_label }}');
+                const daysInput = document.querySelector('#leave_days');
+
+                function calculateDays() {
+                    const fromDate = new Date(fromDateInput.value);
+                    const toDate = new Date(toDateInput.value);
+                    
+                    if (fromDate && toDate && !isNaN(fromDate) && !isNaN(toDate)) {
+                        let days = 0;
+                        let currentDate = new Date(fromDate);
+                        
+                        while (currentDate <= toDate) {
+                            // Don't count Sundays (0 is Sunday in JavaScript)
+                            if (currentDate.getDay() !== 0) {
+                                days++;
+                            }
+                            currentDate.setDate(currentDate.getDate() + 1);
+                        }
+                        
+                        daysInput.value = days;
+                    } else {
+                        daysInput.value = '';
+                    }
+                }
+
+                fromDateInput.addEventListener('change', calculateDays);
+                toDateInput.addEventListener('change', calculateDays);
+            });
+        </script>
+
+        <form id="other" method="post" class="request-form hidden">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="other">
+            {{ other_form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- History Section Button -->
+    <div class="text-center mt-5">
+        <button id="historyBtn" class="absolute border-2 p-2 bg-gray-500 right-0 top-0">View Request History</button>
+        <div id="historyOptions" class="hidden absolute bg-white right-2 mt-2 top-10 w-40 flex flex-col">
+            <button class="bg-white text-black" onclick="showHistory('expenditure')">Expenditure</button>
+            <button class="bg-white text-black" onclick="showHistory('leave')">Leave</button>
+            <button class="bg-white text-black" onclick="showHistory('other')">Other</button>
+        </div>
+    </div>
+
+    <!-- History Section Content -->
+    <div id="historySection" class="hidden mt-4">
+        <h3 id="historyTitle" class="text-xl font-bold mb-4"></h3>
+        
+        <!-- Filter Buttons -->
+        <div class="filter-buttons mb-4 flex flex-wrap gap-2">
+            <button onclick="filterHistory('all')" class="filter-btn active">All</button>
+            <button onclick="filterHistory('7days')" class="filter-btn">Past 7 Days</button>
+            <button onclick="filterHistory('15days')" class="filter-btn">Past 15 Days</button>
+            <button onclick="filterHistory('month')" class="filter-btn">Past Month</button>
+        </div>
+        
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th id="col1" class="p-2"></th>
+                    <th id="col2" class="p-2"></th>
+                    <th id="col3" class="p-2"></th>
+                    <th id="col4" class="p-2"></th>
+                    <th class="p-2">Status</th>
+                </tr>
+            </thead>
+            <tbody id="historyData"></tbody>
+        </table>
+    </div>
+</section>
+
+<!-- JavaScript -->
+<script>
+    // Store the history data globally
+    let currentHistoryData = [];
+    let currentHistoryType = '';
+    let currentFilterPeriod = 'all';
+    
+    function showForm(formType, button) {
+        // Hide all forms first
+        document.querySelectorAll('.request-form').forEach(form => {
+            form.classList.add('hidden');
+        });
+        
+        // Show the selected form
+        const selectedForm = document.getElementById(formType);
+        if (selectedForm) {
+            selectedForm.classList.remove('hidden');
+        }
+        
+        // Update button states
+        document.querySelectorAll('.request-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        if (button) {
+            button.classList.add('active');
+        } else {
+            document.getElementById(formType + 'Btn').classList.add('active');
+        }
+        
+        // Ensure the forms container is visible
+        document.getElementById('formsContainer').classList.remove('hidden');
+    }
+
+    document.getElementById("historyBtn").addEventListener("click", function () {
+        document.getElementById("historyOptions").classList.toggle("hidden");
+    });
+    
+    // Filter history based on time period
+    function filterHistory(period) {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.filter-btn[onclick*="${period}"]`).classList.add('active');
+        
+        currentFilterPeriod = period;
+        displayFilteredHistory();
+    }
+    
+    // Filter data based on date
+    function displayFilteredHistory() {
+        if (!currentHistoryData.length) return;
+        
+        const today = new Date();
+        let filteredData = [];
+        
+        if (currentFilterPeriod === 'all') {
+            filteredData = currentHistoryData;
+        } else {
+            // Calculate the filter date threshold
+            let daysToSubtract = 30; // default to month
+            if (currentFilterPeriod === '7days') daysToSubtract = 7;
+            if (currentFilterPeriod === '15days') daysToSubtract = 15;
+            
+            const filterDate = new Date();
+            filterDate.setDate(today.getDate() - daysToSubtract);
+            
+            // Filter the data based on date
+            filteredData = currentHistoryData.filter(item => {
+                let itemDate;
+                if (currentHistoryType === 'expenditure') {
+                    itemDate = new Date(item.date);
+                } else if (currentHistoryType === 'leave') {
+                    // For leave requests, consider the from_date
+                    itemDate = new Date(item.from_date);
+                } else {
+                    itemDate = new Date(item.date);
+                }
+                return itemDate >= filterDate;
+            });
+        }
+        
+        populateHistoryTable(filteredData);
+    }
+    
+    // Populate the history table with data
+    function populateHistoryTable(data) {
+        let tbody = document.getElementById("historyData");
+        tbody.innerHTML = "";
+        
+        if (data.length === 0) {
+            let row = document.createElement('tr');
+            row.innerHTML = `<td colspan="5" class="p-2 text-center">No data found for the selected period</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+        
+        data.forEach(item => {
+            let row = document.createElement('tr');
+            if (currentHistoryType === 'expenditure') {
+                row.innerHTML = `
+                    <td class="p-2">${item.name}</td>
+                    <td class="p-2">${item.amount}</td>
+                    <td class="p-2">${item.date}</td>
+                    <td class="p-2"></td>
+                    <td class="p-2">${item.status}</td>
+                `;
+            } else if (currentHistoryType === 'leave') {
+                row.innerHTML = `
+                    <td class="p-2">${item.title}</td>
+                    <td class="p-2">${item.from_date}</td>
+                    <td class="p-2">${item.to_date}</td>
+                    <td class="p-2 message-cell">${item.message ? (item.message.length > 30 ? item.message.substring(0, 30) + '...' : item.message) : ""}</td>
+                    <td class="p-2">${item.status}</td>
+                `;
+            } else {
+                row.innerHTML = `
+                    <td class="p-2">${item.title}</td>
+                    <td class="p-2">${item.date}</td>
+                    <td class="p-2 message-cell">${item.message ? (item.message.length > 30 ? item.message.substring(0, 30) + '...' : item.message) : ""}</td>
+                    <td class="p-2"></td>
+                    <td class="p-2">${item.status}</td>
+                `;
+            }
+            tbody.appendChild(row);
+        });
+    }
+
+    function showHistory(type) {
+        // Hide forms when viewing history
+        document.getElementById("formsContainer").classList.add("hidden");
+        document.getElementById("requestButtons").classList.add("hidden");
+        
+        // Show history section
+        document.getElementById("historySection").classList.remove("hidden");
+        
+        let col1 = "", col2 = "", col3 = "", col4 = "";
+
+        // Store the current history type
+        currentHistoryType = type;
+        
+        // Reset filter to 'all'
+        currentFilterPeriod = 'all';
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('.filter-btn[onclick*="all"]').classList.add('active');
+
+        if (type === 'expenditure') {
+            document.getElementById("historyTitle").innerText = "Expenditure Requests History";
+            col1 = "Expenditure Name";
+            col2 = "Amount";
+            col3 = "Date";
+            col4 = "";
+            currentHistoryData = JSON.parse('{{ expenditure_data|safe|default:"[]" }}');
+        } else if (type === 'leave') {
+            document.getElementById("historyTitle").innerText = "Leave Requests History";
+            col1 = "Title";
+            col2 = "From Date";
+            col3 = "To Date";
+            col4 = "Message";
+            currentHistoryData = JSON.parse('{{ leave_data|safe|default:"[]" }}');
+        } else {
+            document.getElementById("historyTitle").innerText = "Other Requests History";
+            col1 = "Title";
+            col2 = "Date";
+            col3 = "Message";
+            col4 = "";
+            currentHistoryData = JSON.parse('{{ other_data|safe|default:"[]" }}');
+        }
+
+        document.getElementById("col1").innerText = col1;
+        document.getElementById("col2").innerText = col2;
+        document.getElementById("col3").innerText = col3;
+        document.getElementById("col4").innerText = col4;
+        
+        // Display all data initially
+        displayFilteredHistory();
+        
+        // Add a back button to return to forms
+        let backBtn = document.createElement('button');
+        backBtn.innerText = "Back to Forms";
+        backBtn.className = "mt-4 p-2 bg-blue-500 text-white rounded";
+        backBtn.onclick = function() {
+            document.getElementById("historySection").classList.add("hidden");
+            document.getElementById("formsContainer").classList.remove("hidden");
+            document.getElementById("requestButtons").classList.remove("hidden");
+        };
+        
+        // Clear any existing back button before adding a new one
+        let existingBackBtn = document.querySelector('#historySection .mt-4.p-2');
+        if (existingBackBtn) existingBackBtn.remove();
+        
+        document.getElementById("historySection").appendChild(backBtn);
+    }
+</script>
+
+<style>
+    .hidden { 
+        display: none !important; 
+    }
+    
+    /* Styling for the dashboard stats cards */
+    .request-stats-container {
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-header {
+        padding: 1rem;
+        color: white;
+    }
+    
+    .card-body {
+        padding: 1rem;
+        background: white;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .stat-label {
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .stat-value {
+        font-weight: 700;
+        color: #333;
+    }
+    
+    /* Button styling */
+    .request-btn {
+        margin: 5px;
+        padding: 8px 16px;
+        background: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .request-btn:hover {
+        background: #0056b3;
+    }
+    
+    .request-btn.active {
+        background: #004085;
+        box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.5);
+    }
+    
+    /* Filter buttons */
+    .filter-btn {
+        padding: 6px 12px;
+        background: #f0f0f0;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    .filter-btn.active {
+        background: #4338CA;
+        color: white;
+        border-color: #3730a3;
+    }
+    
+    /* Form styling */
+    .request-form {
+        max-width: 500px;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border: 2px solid #ccc;
+    }
+
+    .request-form label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .request-form input[type="text"],
+    .request-form input[type="number"],
+    .request-form input[type="date"],
+    .request-form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .request-form button[type="submit"] {
+        width: 100%;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .request-form button[type="submit"]:hover {
+        background-color: #218838;
+    }
+
+    #historyOptions button {
+        width: 100%;
+        text-align: left;
+        padding: 8px 16px;
+        background: white;
+        color: black;
+        border: 1px solid #ddd;
+    }
+
+    #historyOptions button:hover {
+        background: #f5f5f5;
+    }
+    
+    /* Table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    th {
+        background: #f2f2f2;
+    }
+    
+    /* Message cell styling */
+    .message-cell {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        position: relative;
+    }
+    
+    .message-cell:hover::after {
+        content: attr(data-full-message);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: white;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        z-index: 1000;
+        white-space: normal;
+        max-width: 300px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: white;
+    }
+    
+    .form-group input[readonly] {
+        background-color: #f3f4f6;
+    }
+    
+    .btn-success {
+        background-color: #059669;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-success:hover {
+        background-color: #047857;
+    }
+    
+    .request-form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .request-form.hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+    

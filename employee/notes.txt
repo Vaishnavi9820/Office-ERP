@@ -1,0 +1,54 @@
+ <!-- {% extends 'base.html' %}
+
+{% block content %}
+<section class="home">
+    <div class="text">Make Request</div>
+    
+  
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div>
+        <button onclick="showForm('expenditure')">Expenditure Request</button>
+        <button onclick="showForm('leave')">Leave Request</button>
+        <button onclick="showForm('other')">Other Request</button>
+    </div>
+
+   
+    <form id="expenditure" method="post" style="display: none;">
+        {% csrf_token %}
+        {{ expenditure_form.as_p }}
+        <input type="hidden" name="form_type" value="expenditure">
+        <button type="submit">Submit</button>
+    </form>
+
+    <form id="leave" method="post" style="display: none;">
+        {% csrf_token %}
+        {{ leave_form.as_p }}
+        <input type="hidden" name="form_type" value="leave">
+        <button type="submit">Submit</button>
+    </form>
+
+ 
+    <form id="other" method="post" style="display: none;">
+        {% csrf_token %}
+        {{ other_form.as_p }}
+        <input type="hidden" name="form_type" value="other">
+        <button type="submit">Submit</button>
+    </form>
+</section>
+
+<script>
+    function showForm(formType) {
+        document.getElementById('expenditure').style.display = 'none';
+        document.getElementById('leave').style.display = 'none';
+        document.getElementById('other').style.display = 'none';
+        document.getElementById(formType).style.display = 'block';
+    }
+</script>
+{% endblock %} -->

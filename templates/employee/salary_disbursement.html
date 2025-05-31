@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Salary Disbursement</title>
+</head>
+<body>
+    <h1>Salary Disbursement</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+
+    <h2>Disbursement Records</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Total Salary</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in salary_records %}
+                <tr>
+                    <td>{{ record.employee.firstName }}</td>
+                    <td>{{ record.month }}</td>
+                    <td>{{ record.year }}</td>
+                    <td>{{ record.total_salary }}</td>
+                    <td>{{ record.status }}</td>
+                    <td>
+                        <a href="{% url 'update_salary_status' record.id 'Paid' %}">Mark as Paid</a> |
+                        <a href="{% url 'update_salary_status' record.id 'Pending' %}">Mark as Pending</a> |
+                        <a href="{% url 'update_salary_status' record.id 'Delayed' %}">Mark as Delayed</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

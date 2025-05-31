@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="home">
+    <div class="text">
+        <h2>Submit Expenditure Request</h2>
+        <div class="form-container" style="max-width: 600px; margin: auto;">
+            <form method="post">
+                {% csrf_token %}
+                <div style="margin-bottom: 10px;">
+                    <label for="id_Expenditure_Name">Expenditure Name:</label><br>
+                    {{ form.Expenditure_Name }}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="id_Amount">Amount:</label><br>
+                    {{ form.Amount }}
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="id_Date">Date:</label><br>
+                    {{ form.Date }}
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" style="padding: 10px 20px; background-color: #6366f1; color: white; border: none; border-radius: 5px;">
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

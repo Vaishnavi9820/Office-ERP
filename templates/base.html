@@ -1,0 +1,141 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="{% static './css/style.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <title>Employee Management</title> 
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar -->
+    <nav class="w-64 bg-gray-900 text-white min-h-screen p-5 transition-all">
+        <div class="flex items-center justify-between mb-5">
+            <span class="text-2xl font-bold">Employee Management</span>
+            <button id="toggleSidebar" class="text-xl focus:outline-none">
+                <i class='bx bx-menu'></i>
+            </button>
+        </div>
+
+        <ul class="space-y-4">
+            <li><a href="/ems/dashboard" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-home-alt text-xl'></i> <span class="ml-3">Dashboard</span></a></li>
+            <!-- <li><a href="/ems/assignwork" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-bar-chart-alt-2 text-xl'></i> <span class="ml-3">Assign Work</span></a></li> -->
+            <li><a href="/ems/notice" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-bell text-xl'></i> <span class="ml-3">Notice</span></a></li>
+            <li><a href="{% url 'user_notifications' %}" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-bell text-xl'></i> <span class="ml-3">Notifications</span></a></li>
+            <li><a href="/ems/make_request/" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-message-error text-xl'></i> <span class="ml-3">Request</span></a></li>
+            <li><a href="{% url 'attendance_summary' %}" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-calendar text-xl'></i> <span class="ml-3">Attendance</span></a></li>
+            <li><a href="/ems/my_work/" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-task text-xl'></i> <span class="ml-3">My Work</span></a></li>
+            <!-- <li><a href="/ems/editAW" class="flex items-center p-2 hover:bg-gray-700 rounded"><i class='bx bx-edit-alt text-xl'></i> <span class="ml-3">Edit Assigned Works</span></a></li> -->
+        </ul>
+
+        <form id="logout-form" action="{% url 'logout_user' %}" method="post" class="absolute bottom-5 w-full">
+            {% csrf_token %}
+            <input type="hidden" id="logout_location" name="logout_location">
+            <button type="button" onclick="sendLogoutLocation();" class=" p-2 flex items-center justify-center bg-red-600 rounded hover:bg-red-700">
+                <i class='bx bx-log-out text-xl'></i> <span class="ml-3">Logout</span>
+            </button>
+        </form>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        // Setup automatic midnight logout
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAutoLogout();
+        });
+
+        function setupAutoLogout() {
+            // Calculate time until midnight
+            const now = new Date();
+            const midnight = new Date(now);
+            midnight.setHours(24, 0, 0, 0);
+            const timeUntilMidnight = midnight - now;
+            
+            console.log(`Auto logout scheduled in ${Math.floor(timeUntilMidnight/1000/60)} minutes`);
+            
+            // Set timeout for midnight logout
+            setTimeout(function() {
+                console.log("Midnight reached - auto logout triggered");
+                // Get last known location from localStorage
+                const loginToken = localStorage.getItem('employeeLoginToken');
+                let location = '';
+                
+                if (loginToken) {
+                    try {
+                        const tokenData = JSON.parse(loginToken);
+                        location = tokenData.location || '';
+                    } catch (e) {
+                        console.error("Error parsing login token:", e);
+                    }
+                }
+                
+                // Trigger logout with the location
+                document.getElementById('logout_location').value = location;
+                document.getElementById('logout-form').submit();
+            }, timeUntilMidnight);
+        }
+        
+        function sendLogoutLocation() {
+            // Always clear localStorage token immediately to prevent issues with lingering sessions
+            localStorage.removeItem('employeeLoginToken');
+            sessionStorage.clear();
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const logoutLocation = `${position.coords.latitude},${position.coords.longitude}`;
+                        document.getElementById('logout_location').value = logoutLocation;
+                        document.getElementById('logout-form').submit();
+                    },
+                    function () {
+                        // If geolocation fails, try to use stored location
+                        document.getElementById('logout-form').submit();
+                    }
+                );
+            } else {
+                // If geolocation is not supported, just logout
+                document.getElementById('logout-form').submit();
+            }
+        }
+
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.querySelector('nav').classList.toggle('w-20');
+        });
+
+        // Function to check for clear_local_storage cookie and clear localStorage if present
+        function checkClearLocalStorageCookie() {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('clear_local_storage=')) {
+                    // Clear all browser storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Remove the cookie by setting its expiry to the past
+                    document.cookie = "clear_local_storage=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    
+                    console.log("Local storage and session storage cleared on logout");
+                    break;
+                }
+            }
+        }
+        
+        // Check for the cookie when the page loads
+        document.addEventListener('DOMContentLoaded', checkClearLocalStorageCookie);
+    </script>
+
+</body>
+</html>

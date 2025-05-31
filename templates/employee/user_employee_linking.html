@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lobster+Two&family=Raleway:wght@100&family=Ubuntu:wght@300&display=swap"
+        rel="stylesheet">
+    <title>Link User to Employee</title>
+    <style>
+        body {
+            background-color: whitesmoke;
+            box-sizing: border-box;
+            margin: 0;
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        .container {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 1000px;
+            margin: 5% auto;
+            background-color: white;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #e74c3c;
+            color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h4 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .info-box {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 6px;
+        }
+
+        .warning-box {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #b45309;
+        }
+
+        .info-box h5 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .info-box p {
+            margin: 0.5rem 0;
+        }
+
+        .blue-box {
+            background-color: #e0f2fe;
+            border: 1px solid #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .form-section {
+            margin-top: 2rem;
+        }
+
+        .form-section h5 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #34495e;
+        }
+
+        select.form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #636e72;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h4>Employee Record Not Found</h4>
+        </div>
+
+        <div class="info-box warning-box">
+            <h5>Authenticated User Information:</h5>
+            <p><strong>Username:</strong> {{ username }}</p>
+            <p><strong>User ID:</strong> {{ user_id }}</p>
+            <p><strong>Email:</strong> {{ authenticated_user.email|default:"Not provided" }}</p>
+            <p><strong>First Name:</strong> {{ authenticated_user.first_name|default:"Not provided" }}</p>
+            <p><strong>Last Name:</strong> {{ authenticated_user.last_name|default:"Not provided" }}</p>
+        </div>
+
+        <div class="info-box blue-box">
+            <h5>The Problem:</h5>
+            <p>Your user account exists in the system and you've successfully authenticated, but there is no employee record linked to your user account.</p>
+            <p>To use the employee management system, your user account must be linked to an employee record.</p>
+        </div>
+
+        <div class="form-section">
+            {% if matching_employees %}
+            <div class="info-box" style="background-color: #e8f5e9; border-color: #2e7d32; color: #1b5e20;">
+                <h5>Matching Employee Record Found</h5>
+                <p>We found an employee record that matches your account details. Would you like to link to this record?</p>
+                <ul>
+                    {% for emp in matching_employees %}
+                    <li>
+                        <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>
+                        (ID: {{ emp.eID }}, Email: {{ emp.email }})
+                        <form method="post" action="{% url 'link_user_to_employee' %}" style="display: inline-block; margin-left: 10px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user_id }}">
+                            <input type="hidden" name="employee_id" value="{{ emp.eID }}">
+                            <button type="submit" class="btn" style="background-color: #2e7d32; color: white; padding: 2px 8px; font-size: 0.8rem;">Link This Account</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p>If this isn't your record, you can still select from other available records below.</p>
+            </div>
+            {% endif %}
+            
+            {% if no_employees %}
+            <div class="info-box warning-box">
+                <h5>No Employee Records Found</h5>
+                <p>There are no employee records in the database. You need to create a new employee record for your account.</p>
+            </div>
+            
+            <h5>Create New Employee Record</h5>
+            <form method="post" action="{% url 'link_user_to_employee' %}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+                <input type="hidden" name="create_new" value="true">
+                
+                <div class="form-group">
+                    <label for="eID">Employee ID:</label>
+                    <input type="text" class="form-control" id="eID" name="eID" required placeholder="Enter unique employee ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" class="form-control" id="firstName" name="firstName" value="{{ authenticated_user.first_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="middleName">Middle Name:</label>
+                    <input type="text" class="form-control" id="middleName" name="middleName" placeholder="Optional">
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" class="form-control" id="lastName" name="lastName" value="{{ authenticated_user.last_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phoneNo">Phone Number:</label>
+                    <input type="text" class="form-control" id="phoneNo" name="phoneNo" required placeholder="Enter phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user_email|default:authenticated_user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="addharNo">Aadhar Number:</label>
+                    <input type="text" class="form-control" id="addharNo" name="addharNo" required placeholder="Enter Aadhar number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dOB">Date of Birth:</label>
+                    <input type="date" class="form-control" id="dOB" name="dOB" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="designation">Designation:</label>
+                    <select class="form-control" id="designation" name="designation" required>
+                        <option value="">-- Select Designation --</option>
+                        <option value="Team Leader">Team Leader</option>
+                        <option value="Project Manager">Project Manager</option>
+                        <option value="Senior Developer">Senior Developer</option>
+                        <option value="Junior Developer">Junior Developer</option>
+                        <option value="Intern">Intern</option>
+                        <option value="QA Tester">QA Tester</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="salary">Salary:</label>
+                    <input type="text" class="form-control" id="salary" name="salary" required placeholder="Enter salary">
+                </div>
+                
+                <div class="form-group">
+                    <label for="joinDate">Join Date:</label>
+                    <input type="date" class="form-control" id="joinDate" name="joinDate" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Employee & Link Account</button>
+            </form>
+            {% else %}
+            <h5>Available Employee Records {% if all_employees|length > 20 %}(Showing 20 of {{ all_employees|length }}){% endif %}:</h5>
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            <form method="post" action="{% url 'link_user_to_employee' %}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user_id }}">
+
+                <div class="form-group">
+                    <label for="employee_id">Select an employee record to link to your account:</label>
+                    <select class="form-control" id="employee_id" name="employee_id" required>
+                        <option value="">-- Select Employee --</option>
+                        {% for employee in all_employees %}
+                        <option value="{{ employee.eID }}">{{ employee.firstName }} {{ employee.lastName }} ({{ employee.eID }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Link Account</button>
+            </form>
+            {% endif %}
+
+            <a href="{% url 'logout_user' %}" class="btn btn-secondary">Logout</a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="text-2xl font-bold">Make a Request</h2>
+    </div>
+
+    {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Button Group -->
+    <div class="text-center mb-4">
+        <button id="expenditureBtn" class="border-green-500 hover:bg-green-500 border-2 p-2 bg-white" onclick="showForm('expenditure', this)">Expenditure Request</button>
+        <button id="leaveBtn" class="border-green-500 hover:bg-green-500 border-2 p-2 bg-white" onclick="showForm('leave', this)">Leave Request</button>
+        <button id="otherBtn" class="border-green-500 hover:bg-green-500 border-2 p-2 bg-white" onclick="showForm('other', this)">Other Request</button>
+    </div>
+
+    <!-- Expenditure Request Form -->
+    <form id="expenditure" method="post" action="{% url 'expenditure_requests' %}" class="request-form" style="display: none;">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="expenditure_name" class="form-label">Expenditure Name:</label>
+            <input type="text" class="form-control" name="expenditure_name" id="expenditure_name" required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount:</label>
+            <input type="number" class="form-control" name="amount" id="amount" required>
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Date:</label>
+            <input type="date" class="form-control" name="date" id="date" required>
+        </div>
+        <input type="hidden" name="form_type" value="expenditure">
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+
+    <!-- Leave Request Form -->
+    <form id="leave" method="post" class="request-form" style="display: none;">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ leave_form.as_p }}
+        </div>
+        <input type="hidden" name="form_type" value="leave">
+        <button type="submit" class="btn btn-success w-100">Submit</button>
+    </form>
+
+    <!-- Other Request Form -->
+    <form id="other" method="post" class="request-form" style="display: none;">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ other_form.as_p }}
+        </div>
+        <input type="hidden" name="form_type" value="other">
+        <button type="submit" class="btn btn-warning w-100">Submit</button>
+    </form>
+</section>
+
+<!-- JavaScript to Show Forms -->
+<script>
+    function showForm(formType,button) {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-green-600');  // Remove active state
+            btn.classList.add('bg-white');          // Set bg-white for non-active buttons
+        });
+
+        // Set bg-green-200 to the clicked button
+        button.classList.remove('bg-white');     // Remove bg-white from the active button
+        button.classList.add('bg-green-600');    // Add bg-green-200 to the active button
+
+        // Your code to show the form based on formType
+        console.log(formType + " form displayed");
+
+        // Your code for showing the form based on formType
+       
+        document.querySelectorAll('.request-form').forEach(form => form.style.display = 'none');
+        document.getElementById(formType).style.display = 'block';
+    }
+
+   
+</script>
+
+<!-- Bootstrap Styles -->
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    .request-form {
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border: 2px solid #ccc; /* Light gray border */
+    }
+
+    form label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    form input, form textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #218838;
+    }
+</style>
+{% endblock %}

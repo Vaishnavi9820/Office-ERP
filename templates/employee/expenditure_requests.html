@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Expenditure Requests</h2>
+<table>
+  <tr>
+    <th>Employee</th>
+    <th>Expenditure Name</th>
+    <th>Amount</th>
+    <th>Status</th>
+    <th>Actions</th>
+  </tr>
+  {% for request in expenditure_requests %}
+  <tr>
+    <td>{{ request.employee.username }}</td>
+    <td>{{ request.expenditure_name }}</td>
+    <td>{{ request.amount }}</td>
+    <td>{{ request.status }}</td>
+    <td>
+      <form method="POST" action="{% url 'handle_expenditure_request' request.id %}">
+        {% csrf_token %}
+        <button name="approve">Approve</button>
+        <button name="paid">Paid</button>
+        <button name="unpaid">Unpaid</button>
+        <button name="delete">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

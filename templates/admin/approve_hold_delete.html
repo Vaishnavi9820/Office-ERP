@@ -1,0 +1,7 @@
+<!-- admin/approve_hold_delete.html -->
+<form method="post">
+    {% csrf_token %}
+    <label for="reason">Reason</label>
+    <textarea name="reason"></textarea>
+    <button type="submit">Submit</button>
+  </form>

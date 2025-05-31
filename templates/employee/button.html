@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .button-container {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .expenditure-request {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .other-application {
+            background-color: #008CBA;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button class="expenditure-request" onclick="handleExpenditureRequest()">Expenditure Request</button>
+        <button class="other-application" onclick="handleOtherApplication()">Other Application</button>
+    </div>
+
+    <script>
+        function handleExpenditureRequest() {
+            alert("Expenditure Request button clicked!");
+            // Add your logic here
+        }
+
+        function handleOtherApplication() {
+            alert("Other Application button clicked!");
+            // Add your logic here
+        }
+    </script>
+</body>
+</html>

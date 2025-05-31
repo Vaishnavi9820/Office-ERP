@@ -1,0 +1,27 @@
+<h2>Employee Attendance Records</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Login Time</th>
+            <th>Login Location</th>
+            <th>Logout Time</th>
+            <th>Logout Location</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+            <tr>
+                <td>{{ record.employee.username }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.login_time }}</td>
+                <td>{{ record.login_location }}</td>
+                <td>{{ record.logout_time }}</td>
+                <td>{{ record.logout_location }}</td>
+                <td>{{ record.total_working_hours }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

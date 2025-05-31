@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+  <div class="max-w-3xl mx-auto text-center mb-10">
+    <h1 class="text-5xl font-extrabold text-gray-800 dark:text-white drop-shadow">
+      📝 Task Overview
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">Here’s what you’re working on!</p>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700 transform transition duration-500 hover:scale-[1.02]">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-indigo-700 dark:text-indigo-300">
+        {{ task.task_details }}
+      </h2>
+      <span class="px-4 py-1 text-sm font-medium rounded-full shadow-sm
+        {% if task.is_completed %}
+          bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
+        {% else %}
+          bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
+        {% endif %}
+      ">
+        {% if task.is_completed %}✅ Completed{% else %}⏳ Pending{% endif %}
+      </span>
+    </div>
+
+    <div class="space-y-4 text-gray-800 dark:text-gray-300 text-lg">
+      <!-- <p><span class="font-semibold">🧑 Assigned By:</span> {{ task.assigned_by.username }}</p> -->
+      <p><span class="font-semibold">📅 Assigned Date:</span> {{ task.assign_date }}</p>
+      <p><span class="font-semibold">⏰ Due Date:</span> {{ task.due_date }}</p>
+      <p><span class="font-semibold">🧾 Description:</span> {{ task.task_details }}</p>
+    </div>
+
+    {% if not task.is_completed %}
+    <div class="mt-8 text-right">
+      <a href="{% url 'mark_task_complete' task.id %}"
+        class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2 px-5 rounded-xl shadow-lg transition duration-300">
+        ✅ Mark as Complete
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

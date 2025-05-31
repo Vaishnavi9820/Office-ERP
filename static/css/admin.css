@@ -1,0 +1,156 @@
+/* Admin specific overrides for black circles */
+html, 
+body {
+  background-color: #f5f8fb !important;
+  position: relative;
+}
+
+html::after,
+body::after,
+html::before,
+body::before,
+.main::before,
+.main::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: static !important;
+  border-radius: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Target absolute positioned elements */
+body > *[style*="position: absolute"],
+body > *[style*="position:absolute"],
+html > *[style*="position: absolute"],
+html > *[style*="position:absolute"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Target fixed positioned elements */
+body > *[style*="position: fixed"],
+body > *[style*="position:fixed"],
+html > *[style*="position: fixed"],
+html > *[style*="position:fixed"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+div[style*="background-color: #000"],
+div[style*="background: #000"],
+div[style*="background-color: black"],
+div[style*="background: black"],
+div[style*="border-radius: 50%"],
+div[style*="border-radius:50%"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.blob,
+.black-bg,
+.black-circle,
+.circle,
+.decoration,
+.decorator {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Force override any decorative background elements */
+#container::before,
+#container::after,
+#content::before,
+#content::after,
+.main::before,
+.main::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  position: static !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* Target CSS shapes that might be creating black circles */
+[style*="border-radius"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Remove animation styles that might affect circles */
+@keyframes none-animation {
+  from { opacity: 0; }
+  to { opacity: 0; }
+}
+
+[style*="animation"] {
+  animation: none-animation 0s !important;
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
+}
+
+/* Clean up SVG elements */
+svg circle,
+svg ellipse {
+  fill: transparent !important;
+  display: none !important;
+}
+
+/* Ensure the page background is clean */
+#wrap,
+.wrapper,
+.container,
+.content-wrapper,
+.page-wrapper {
+  background-color: #f5f8fb !important;
+}
+
+/* Target elements with z-index that might be overlaid */
+[style*="z-index"] {
+  z-index: 0 !important;
+}
+
+/* Force all overlays to be transparent */
+.overlay,
+[class*="overlay"],
+[class*="backdrop"],
+.backdrop {
+  background-color: transparent !important;
+  display: none !important;
+}
+
+/* Target elements with specific styles that might create black circles */
+div[style*="border-radius"][style*="background"],
+div[style*="transform: translate"][style*="background"] {
+  background: transparent !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+
+/* Target elements with transitions and transforms */
+[style*="transition"],
+[style*="transform"] {
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Target the specific pattern of elements that might be creating the black circles */
+html body > div:not([id]):not([class]) {
+  display: none !important;
+}
+
+/* Final cleanup for any non-semantic decorative elements */
+div:empty,
+div:not([id]):not([class]) {
+  display: none !important;
+} 

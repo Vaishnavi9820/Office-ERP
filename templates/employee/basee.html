@@ -1,0 +1,182 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="{% static './css/style.css' %}">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <link href='https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css' rel='stylesheet'>
+    
+    <title>Employee Management</title> 
+</head>
+<body>
+    <nav class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="{% static 'assets/logo.png' %}" alt="">
+                </span>
+
+                <div class="text logo-text">
+                    <span class="name">Employee</span>
+                    <span class="profession">Management</span>
+                </div>
+            </div>
+
+            <i class='toggle'></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+
+                <ul class="menu-links">
+                    <li class="nav-link">
+                        <a href="/ems/dashboard">
+                            <i class='bx bx-home-alt icon' ></i>
+                            <span class="text nav-text">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="/ems/assignwork">
+                            <i class='bx bx-bar-chart-alt-2 icon' ></i>
+                            <span class="text nav-text">Assign Work</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="/ems/notice">
+                            <i class='bx bx-bell icon'></i>
+                            <span class="text nav-text">Notice</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="{% url 'user_notifications' %}">
+                            <i class='bx bx-bell icon'></i>
+                            <span class="text nav-text">Notifications</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="/ems/make_request/">
+                            <i class='bx bx-message-error icon' ></i>
+                            <span class="text nav-text">Request</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="{% url 'view_all_requests' %}">
+                            <i class='bx bx-list-check icon' ></i>
+                            <span class="text nav-text">All Requests</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="{% url 'attendance_summary' %}">
+                            <i class='bx bx-calendar icon'></i>
+                            <span class="text nav-text">Attendance</span>
+                        </a>
+                    </li>                    
+
+                    <li class="nav-link">
+                        <a href="/ems/my_work/">
+                            <i class='bx bx-task icon'></i>
+                            <span class="text nav-text">My Work</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-link">
+                        <a href="/ems/editAW">
+                            <i class='bx bx-edit-alt icon' ></i>
+                            <span class="text nav-text">Edit Assigned Works</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+
+             <div class="bottom-content">
+                <li class="nav-link">
+                    <form id="logout-form" action="{% url 'logout_user' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="logout_location" name="logout_location">
+                        <a href="javascript:void(0);" onclick="sendLogoutLocation();" class="logout-link">
+                            <i class='bx bx-log-out icon'></i>
+                            <span class="text nav-text">Logout</span>
+                        </a>
+                    </form>
+                </li>               
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+   
+    <script>
+        function sendLogoutLocation() {
+            // Disable the logout link to prevent multiple clicks
+            const logoutLink = document.querySelector('.logout-link');
+            logoutLink.style.opacity = '0.5';
+            logoutLink.style.pointerEvents = 'none';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const logoutLocation = `${latitude},${longitude}`;
+                        
+                        // Set the logout location in the hidden input
+                        document.getElementById('logout_location').value = logoutLocation;
+                        
+                        console.log("Fetched logout location:", logoutLocation);
+                        
+                        // Submit the logout form
+                        document.getElementById('logout-form').submit();
+                    },
+                    function (error) {
+                        console.error("Error fetching location:", error.message);
+                        // Re-enable the logout link
+                        logoutLink.style.opacity = '1';
+                        logoutLink.style.pointerEvents = 'auto';
+                        
+                        // Show appropriate error message based on the error code
+                        let errorMessage = 'Unable to fetch location. ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Please allow location access and try again.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Location information is unavailable.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Location request timed out.';
+                                break;
+                            default:
+                                errorMessage += 'An unknown error occurred.';
+                        }
+                        alert(errorMessage);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+                // Re-enable the logout link
+                logoutLink.style.opacity = '1';
+                logoutLink.style.pointerEvents = 'auto';
+            }
+        }
+    </script>
+    <script src="{% static './js/script.js' %}"></script>
+</body>
+</html>

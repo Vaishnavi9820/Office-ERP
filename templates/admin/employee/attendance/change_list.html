@@ -1,0 +1,119 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  /* Direct targeting of black circular elements */
+  html, body {
+    background-color: #f5f8fb !important;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Remove any black circular backgrounds */
+  body::before, 
+  body::after, 
+  html::before, 
+  html::after,
+  #container::before,
+  #container::after,
+  div::before,
+  div::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: static !important;
+  }
+  
+  /* Target direct anonymous div elements often used for decorative purposes */
+  body > div:not([id]):not([class]),
+  html > div:not([id]):not([class]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Target absolutely positioned elements */
+  div[style*="position: absolute"],
+  div[style*="position:absolute"] {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  
+  /* Target elements with border-radius that might be circular */
+  div[style*="border-radius: 50%"],
+  div[style*="border-radius:50%"],
+  div[style*="border-radius"] {
+    display: none !important;
+    background: transparent !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  
+  /* Target elements with z-index that might be overlaying content */
+  div[style*="z-index"] {
+    z-index: 0 !important;
+  }
+  
+  /* Hide specific elements that might be causing the issue */
+  .blob, 
+  .circle, 
+  .decoration, 
+  .background-shape {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Remove black backgrounds from any element */
+  [style*="background: black"],
+  [style*="background: #000"],
+  [style*="background-color: black"],
+  [style*="background-color: #000"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+  
+  /* Ensure the main content is properly visible */
+  #content {
+    background-color: #f5f8fb !important;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Remove any anonymous decorative elements before main content -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Remove any direct children of body that don't have ID or class
+    document.querySelectorAll('body > div:not([id]):not([class])').forEach(function(el) {
+      el.remove();
+    });
+    
+    // Remove any elements with black background and border-radius
+    document.querySelectorAll('div').forEach(function(el) {
+      const style = window.getComputedStyle(el);
+      if (
+        (style.backgroundColor === 'rgb(0, 0, 0)' || 
+         style.backgroundColor === '#000000' || 
+         style.backgroundColor === 'black') && 
+        (style.borderRadius.includes('%') || parseInt(style.borderRadius) > 0)
+      ) {
+        el.remove();
+      }
+    });
+  });
+</script>
+{{ block.super }}
+{% endblock %} 

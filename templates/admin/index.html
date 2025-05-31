@@ -1,0 +1,383 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  #content {
+    padding: 30px 40px;
+  }
+  
+  .admin-dashboard {
+    margin-bottom: 20px;
+  }
+  
+  .welcome-message {
+    margin-bottom: 30px;
+  }
+  
+  .welcome-message h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .welcome-message p {
+    color: #666;
+    font-size: 1rem;
+    max-width: 800px;
+  }
+  
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-card.primary { border-top: 3px solid var(--primary-color); }
+  .stat-card.success { border-top: 3px solid var(--success-color); }
+  .stat-card.info { border-top: 3px solid var(--info-color); }
+  .stat-card.warning { border-top: 3px solid var(--warning-color); }
+  .stat-card.danger { border-top: 3px solid var(--danger-color); }
+  
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #333;
+  }
+  
+  .stat-card .stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .app-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .app-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .app-card-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .app-card-header .app-name {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .app-card-content {
+    padding: 0;
+  }
+  
+  .model-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    transition: background-color 0.2s;
+  }
+  
+  .model-link:last-child {
+    border-bottom: none;
+  }
+  
+  .model-link:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+  }
+  
+  .model-actions {
+    opacity: 0.7;
+    font-size: 0.85rem;
+  }
+  
+  .recent-actions {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-top: 30px;
+  }
+  
+  .recent-actions h2 {
+    background: var(--gradient-secondary);
+    color: white;
+    margin: 0;
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .recent-actions-list {
+    padding: 15px 20px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .action-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .action-item:last-child {
+    border-bottom: none;
+  }
+  
+  .action-time {
+    color: #888;
+    font-size: 0.8rem;
+  }
+  
+  .quick-links {
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .quick-link {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 10px 16px;
+    box-shadow: var(--card-shadow);
+    color: var(--primary-color);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .quick-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    color: var(--secondary-color);
+  }
+  
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 20px;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #447e9b;
+    margin: 10px 0;
+  }
+  
+  .stat-label {
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+  }
+  
+  .stat-period {
+    font-size: 0.9em;
+    color: #999;
+  }
+  
+  .employees { background-color: #e8f5e9; }
+  .notices { background-color: #fff3e0; }
+  .tasks { background-color: #e3f2fd; }
+  .requests { background-color: #fce4ec; }
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main" class="admin-dashboard">
+  <div class="welcome-message">
+    <h2>{% trans "SHAKKTII.AI" %}</h2>
+    <p>{% trans "Welcome to the SHAKKTII.AI Admin Dashboard" %}</p>
+  </div>
+  
+  <div class="quick-links">
+    <a href="{% url 'admin:employee_employee_changelist' %}" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+      </svg>
+      {% trans "Employees" %}
+    </a>
+    <a href="{% url 'admin:employee_attendance_changelist' %}" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+      </svg>
+      {% trans "Attendance" %}
+    </a>
+
+    <!-- Add User Management Link -->
+    <a href="{% url 'admin:auth_user_changelist' %}" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+      </svg>
+      {% trans "Users" %}
+    </a>
+    
+    <a href="{% url 'admin:employee_notice_changelist' %}" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+      </svg>
+      {% trans "Notices" %}
+    </a>
+    <a href="{% url 'admin:employee_task_changelist' %}" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+        <path d="M7 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0zM7 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-1.496-.854a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0z"/>
+      </svg>
+      {% trans "Tasks" %}
+    </a>
+    
+    <!-- Add Monthly Details Link -->
+    <a href="/admin/monthly-details/" class="quick-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+      </svg>
+      {% trans "Monthly Details" %}
+    </a>
+  </div>
+  
+  <!-- Statistics cards -->
+  <div class="dashboard-stats">
+    <div class="stat-card primary">
+        <div class="stat-value">{{ employee_count }}</div>
+        <div class="stat-label">Total Employees</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-value">{{ notice_count }}</div>
+        <div class="stat-label">Total Notices</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-value">{{ task_count }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value">{{ request_count }}</div>
+        <div class="stat-label">Total Requests</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-value">{{ user_count|default:"0" }}</div>
+        <div class="stat-label">System Users</div>
+    </div>
+  </div> 
+
+  <!-- App grid cards -->
+  <div class="app-grid">
+    {% for app in app_list %}
+      {% for model in app.models %}
+        <div class="app-card">
+          <div class="app-card-header">
+            <h3 class="app-name">{{ model.name }}</h3>
+          </div>
+          <div class="app-card-content">
+            {% if model.perms.change %}
+              <a href="{{ model.admin_url }}" class="model-link">
+                {% trans "View all" %}
+                <span class="model-actions">{{ model.count }}</span>
+              </a>
+            {% endif %}
+            {% if model.perms.add %}
+              <a href="{{ model.add_url }}" class="model-link">
+                {% trans "Add" %}
+                <span class="model-actions">+</span>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  <!-- Recent actions module -->
+  {% if recent_actions %}
+    <div class="recent-actions">
+      <h2>{% trans 'Recent Actions' %}</h2>
+      <div class="recent-actions-list">
+        {% for entry in recent_actions %}
+          <div class="action-item">
+            {% if entry.is_addition %}
+              <span class="addlink">{% trans 'Added' %}</span>
+            {% elif entry.is_change %}
+              <span class="changelink">{% trans 'Changed' %}</span>
+            {% elif entry.is_deletion %}
+              <span class="deletelink">{% trans 'Deleted' %}</span>
+            {% endif %}
+            {% if entry.content_type %}
+              <span class="action-model">{{ entry.content_type.name }}</span>
+            {% endif %}
+            {% if entry.object_repr %}
+              <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+            {% endif %}
+            <div class="action-time">{{ entry.action_time|date:"j M Y, H:i" }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %} 

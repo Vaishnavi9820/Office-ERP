@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-700 mb-6">Welcome, {{ request.user.first_name }} 👋</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Employee Information Card -->
+        <div class="col-span-2 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Your Information</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <p><strong>Employee ID:</strong> {{ info.eID }}</p>
+                <p><strong>First Name:</strong> {{ info.firstName }}</p>
+                <p><strong>Last Name:</strong> {{ info.lastName }}</p>
+                <p><strong>Email:</strong> {{ info.email }}</p>
+                <p><strong>Phone:</strong> {{ info.phoneNo }}</p>
+                <p><strong>Designation:</strong> {{ info.designation }}</p>
+                <p><strong>Salary:</strong> ₹{{ info.salary }}</p>
+                <p><strong>Joining Date:</strong> {{ info.joinDate }}</p>
+            </div>
+        </div>
+
+        <!-- Attendance Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Attendance of the month: 1</h2>
+            <p><strong>Total Days:</strong> 1</p>
+            <p><strong>Working days:</strong>1</p>
+            <p><strong>Leaves Taken:</strong> 4</p>
+            <!-- <p><strong>Leave Balance:</strong> 5</p> -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+<!-- 
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-lg font-semibold mb-4">Attendance of the month: {{ info.month_name }}</h2>
+    <p><strong>Total Days:</strong> {{ info.total_days }}</p>
+    <p><strong>Working days:</strong> {{ info.working_days }}</p>
+    <p><strong>Leaves Taken:</strong> 4</p>
+    <p><strong>Leave Balance:</strong> 5</p> -->

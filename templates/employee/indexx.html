@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="home ">
+    <div class="text ">
+        Dashboard
+        <div class="flex flex-col ">
+            <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+                    <div class="dashboard-container">
+                    <h1 class="text-3xl font-bold text-gray-700 mb-6">Welcome, {{ request.user.first_name }} 👋</h1>
+                
+                    <div class="grid grid-cols-3 gap-6">
+                      
+                        <div class="card col-span-2">
+                            <h2 class="text-xl font-semibold mb-3">Your Information</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <p><strong>Employee ID:</strong> {{ info.eID }}</p>
+                                <p><strong>First Name:</strong> {{ info.firstName }}</p>
+                                <p><strong>Last Name:</strong> {{ info.lastName }}</p>
+                                <p><strong>Email:</strong> {{ info.email }}</p>
+                                <p><strong>Phone:</strong> {{ info.phoneNo }}</p>
+                                <p><strong>Designation:</strong> {{ info.designation }}</p>
+                                <p><strong>Salary:</strong> ₹{{ info.salary }}</p>
+                                <p><strong>Joining Date:</strong> {{ info.joinDate }}</p>
+                            </div>
+                        </div>
+                
+                        
+                        <div class="card">
+                            <h2 class="text-lg font-semibold">Your Attendance</h2>
+                            <p><strong>Total Days:</strong> 22</p>
+                            <p><strong>Present:</strong> 18</p>
+                            <p><strong>Absent:</strong> 4</p>
+                            <p><strong>Leave Balance:</strong> 5</p>
+                        </div>
+                    </div>
+                </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
+<!-- 
+<div class="dashboard-container">
+    <h1 class="text-3xl font-bold text-gray-700 mb-6">Welcome, {{ request.user.first_name }} 👋</h1>
+
+    <div class="grid grid-cols-3 gap-6">
+      
+        <div class="card col-span-2">
+            <h2 class="text-xl font-semibold mb-3">Your Information</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <p><strong>Employee ID:</strong> {{ employee.eID }}</p>
+                <p><strong>First Name:</strong> {{ employee.first_name }}</p>
+                <p><strong>Last Name:</strong> {{ employee.last_name }}</p>
+                <p><strong>Email:</strong> {{ employee.email }}</p>
+                <p><strong>Phone:</strong> {{ employee.phone }}</p>
+                <p><strong>Designation:</strong> {{ employee.designation }}</p>
+                <p><strong>Salary:</strong> ₹{{ employee.salary }}</p>
+                <p><strong>Joining Date:</strong> {{ employee.joining_date }}</p>
+            </div>
+        </div>
+
+        
+        <div class="card">
+            <h2 class="text-lg font-semibold">Your Attendance</h2>
+            <p><strong>Total Days:</strong> 22</p>
+            <p><strong>Present:</strong> 18</p>
+            <p><strong>Absent:</strong> 4</p>
+            <p><strong>Leave Balance:</strong> 5</p>
+        </div>
+    </div>
+</div> -->

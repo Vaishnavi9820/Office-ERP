@@ -1,0 +1,12 @@
+<!-- view_expenditure_requests.html -->
+<h2>Your Expenditure Requests</h2>
+
+{% if expenditures %}
+    <ul>
+        {% for expenditure in expenditures %}
+            <li>{{ expenditure.date }} - {{ expenditure.expenditure_name }} - {{ expenditure.amount }} - {{ expenditure.status }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No expenditure requests submitted.</p>
+{% endif %}

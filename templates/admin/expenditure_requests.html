@@ -1,0 +1,9 @@
+<!-- admin/expenditure_requests.html -->
+{% for expenditure in expenditures %}
+  <div>
+    <p>{{ expenditure.Expenditure_Name }} - {{ expenditure.Amount }} - {{ expenditure.Date }}</p>
+    <a href="{% url 'update_expenditure_status' expenditure.id 'Approved' %}">Approve</a>
+    <a href="{% url 'update_expenditure_status' expenditure.id 'Hold' %}">Hold</a>
+    <a href="{% url 'update_expenditure_status' expenditure.id 'Deleted' %}">Delete</a>
+  </div>
+{% endfor %}

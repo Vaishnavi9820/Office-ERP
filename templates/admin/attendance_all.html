@@ -1,0 +1,227 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% load tz %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+<style>
+    .attendance-filters {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    .attendance-filters a {
+        margin-right: 10px;
+        padding: 5px 10px;
+        text-decoration: none;
+        border-radius: 3px;
+    }
+    .attendance-filters a.active {
+        background: #79aec8;
+        color: white;
+    }
+    .attendance-filters a:hover:not(.active) {
+        background: #e9ecef;
+    }
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .attendance-table th,
+    .attendance-table td {
+        padding: 10px;
+        border: 1px solid #dee2e6;
+    }
+    .attendance-table th {
+        background: #f8f9fa;
+    }
+    .month-selector, .employee-selector {
+        margin: 10px 0;
+        display: inline-block;
+    }
+    .month-selector select, .employee-selector select {
+        padding: 5px;
+        margin-right: 10px;
+    }
+    .stats-box {
+        background: #fff;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .stats-box h3 {
+        margin-top: 0;
+        color: #666;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    .stat-item {
+        text-align: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #79aec8;
+    }
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+    }
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .filter-form select, .filter-form input {
+        padding: 5px;
+    }
+    .filter-form button {
+        padding: 5px 10px;
+        background: #79aec8;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .filter-form button:hover {
+        background: #417690;
+    }
+    .status-completed {
+        color: green;
+    }
+    .status-in-progress {
+        color: orange;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="attendance-filters">
+        <a href="?period=today" class="{% if period == 'today' %}active{% endif %}">Today</a>
+        <a href="?period=yesterday" class="{% if period == 'yesterday' %}active{% endif %}">Yesterday</a>
+        <a href="?period=7days" class="{% if period == '7days' %}active{% endif %}">Last 7 Days</a>
+        <a href="?period=15days" class="{% if period == '15days' %}active{% endif %}">Last 15 Days</a>
+        <a href="?period=1month" class="{% if period == '1month' %}active{% endif %}">Last Month</a>
+        <a href="?period=monthwise" class="{% if period == 'monthwise' %}active{% endif %}">Month-wise</a>
+    </div>
+
+    <div class="filter-form">
+        <form method="get">
+            <input type="hidden" name="period" value="{{ period }}">
+            
+            <div class="employee-selector">
+                <select name="employee_id">
+                    <option value="">All Employees</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" {% if emp.id|stringformat:"s" == employee_id %}selected{% endif %}>
+                        {{ emp.firstName }} {{ emp.lastName }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            {% if period == 'monthwise' %}
+            <div class="month-selector">
+                <select name="month">
+                    {% for month_num, month_name in months %}
+                    <option value="{{ month_num }}" {% if month_num == current_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <select name="year">
+                    {% for year in years %}
+                    <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
+
+    <div class="stats-box">
+        <h3>Attendance Statistics - {{ period_name }}</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{{ total_records }}</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ completed_sessions }}</div>
+                <div class="stat-label">Completed Sessions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ in_progress_sessions }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ average_hours|floatformat:1 }}</div>
+                <div class="stat-label">Avg. Working Hours</div>
+            </div>
+        </div>
+    </div>
+
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Date</th>
+                <th>Earliest Login Time</th>
+                <th>Latest Logout Time</th>
+                <th>Login Location</th>
+                <th>Logout Location</th>
+                <th>Working Hours</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.employee.firstName }} {{ record.employee.lastName }}</td>
+                <td>{{ record.formatted_date }}</td>
+                <td>{% if record.login_time %}{{ record.login_time|localtime|time:"h:i:s A" }} (IST){% else %}Not logged in{% endif %}</td>
+                <td>{% if record.logout_time %}{{ record.logout_time|localtime|time:"h:i:s A" }} (IST){% else %}Not logged out{% endif %}</td>
+                <td>{{ record.login_location|default:"Unknown" }}</td>
+                <td>{{ record.logout_location|default:"Unknown" }}</td>
+                <td>
+                    {% if record.working_hours %}
+                        {{ record.working_hours|floatformat:1 }} hours
+                    {% else %}
+                        In Progress
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.status == "Completed" %}
+                        <span class="status-completed">Completed</span>
+                    {% else %}
+                        <span class="status-in-progress">In Progress</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center;">No attendance records found for this period.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

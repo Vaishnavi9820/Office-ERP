@@ -1,0 +1,64 @@
+<!-- <form id="logout-form" action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="logout_location" name="logout_location">
+    <button type="button" onclick="sendLogoutLocation()">Logout</button>
+</form> -->
+<form id="logout-form" method="post" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" id="logout_location" name="logout_location">
+</form>
+<!-- <script>
+    function sendLogoutLocation() {
+        // Check if Geolocation is supported
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    const logoutLocation = `${latitude},${longitude}`;
+
+                    // Set the logout location in the hidden input
+                    document.getElementById('logout_location').value = logoutLocation;
+
+                    // Now submit the form with the location included
+                    document.getElementById('logout-form').submit(); // Form is submitted after location is set
+                },
+                function (error) {
+                    alert('Unable to fetch location. Please allow location access and try again.');
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    }
+</script> -->
+
+<script>
+   function sendLogoutLocation() {
+    console.log("Logout button clicked");  // Check if the function is being called
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);  // Check location
+
+                const locationInput = document.getElementById('logout_location');
+                locationInput.value = `${latitude},${longitude}`;
+
+                // Submit the form
+                document.getElementById('logout-form').submit();
+            },
+            function (error) {
+                console.error('Geolocation error:', error);
+                alert('Unable to fetch location. Please allow location access and try again.');
+            }
+        );
+    } else {
+        console.error('Geolocation is not supported by this browser.');
+        alert('Geolocation is not supported by this browser.');
+    }
+}
+
+</script>
